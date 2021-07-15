@@ -978,7 +978,7 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                     }
                 }
             };
-            request.onabort = request.onerror = deferred.reject;
+            request.onabort = request.onerror = reject;
             request.send();
         });
     }
