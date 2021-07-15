@@ -25,7 +25,7 @@
  * along with Kiwix (file LICENSE-GPLv3.txt).  If not, see <http://www.gnu.org/licenses/>
  */
 'use strict';
-define(['q', 'jquery'], function(q, jQuery) {
+define(['jquery'], function(jQuery) {
     
     /**
      * Storage implemented by Firefox OS

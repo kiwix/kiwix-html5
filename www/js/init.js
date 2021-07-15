@@ -49,7 +49,8 @@ require.config({
         },
         'webpHeroBundle': {
             deps: ['webpHeroPolyfills']
-        }
+        },
+        'promisePolyfill': ''
     }
 });
 

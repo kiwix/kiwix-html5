@@ -20,7 +20,7 @@
  * along with Kiwix (file LICENSE-GPLv3.txt).  If not, see <http://www.gnu.org/licenses/>
  */
 'use strict';
-define(['q'], function(Q) {
+define([], function() {
 
     /**
      * A Regular Expression to match the first letter of a word even if preceded by Unicode punctuation
@@ -211,7 +211,7 @@ define(['q'], function(Q) {
                 return new Uint8Array(buffer);
             });
         } else {
-            return Q.Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 var reader = new FileReader();
                 reader.readAsArrayBuffer(file.slice(begin, end));
                 reader.addEventListener('load', function (e) {
