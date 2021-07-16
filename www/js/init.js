@@ -47,14 +47,11 @@ require.config({
         'bootstrap': {
             deps: ['jquery', 'fontawesome', 'fontawesome-solid']
         },
-        'webpHeroBundle': {
-            deps: ['webpHeroPolyfills']
-        },
-        'promisePolyfill': ''
+        'webpHeroBundle': ''
     }
 });
 
-requirejs(['bootstrap'], function (bootstrap) {
+requirejs(['bootstrap', 'arrayFromPolyfill', 'promisePolyfill'], function () {
     requirejs(['../app']);
 });
 

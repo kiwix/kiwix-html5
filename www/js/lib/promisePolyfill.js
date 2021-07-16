@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Yaku v0.19.3
 	(c) 2015 Yad Smood. http://ysmood.org
 	License MIT
