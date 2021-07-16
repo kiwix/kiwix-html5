@@ -36,7 +36,6 @@ require.config({
         'jquery': 'jquery-3.2.1.slim',
         'bootstrap': 'bootstrap.bundle',
         'webpHeroBundle': 'webpHeroBundle_0.0.0-dev.27',
-        'webpHeroPolyfills': 'webpHeroPolyfills_0.0.0-dev.27',
         'fontawesome': 'fontawesome/fontawesome',
         'fontawesome-solid': 'fontawesome/solid'
     },
