@@ -86,7 +86,8 @@ define(['xzdec'], function() {
      * @returns {Promise} A Promise for the read data
      */
     Decompressor.prototype.readSliceSingleThread = function (offset, length) {
-        if (!busy) {
+        // Tests whether the decompressor is ready (initiated) and not busy
+        if (xzdec && !busy) {
             return this.readSlice(offset, length);
         } else {
             // The decompressor is already in progress.
