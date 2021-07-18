@@ -21,7 +21,7 @@
  */
 'use strict';
 
-define(['xzdec_wrapper', 'zstddec_wrapper', 'util', 'utf8', 'q', 'zimDirEntry', 'filecache'], function(xz, zstd, util, utf8, Q, zimDirEntry, FileCache) {
+define(['xzdec_wrapper', 'zstddec_wrapper', 'util', 'utf8', 'zimDirEntry', 'filecache'], function(xz, zstd, util, utf8, zimDirEntry, FileCache) {
 
     /**
      * A variable to keep track of the currently loaded ZIM archive, e.g., for labelling cache entries
@@ -118,12 +118,12 @@ define(['xzdec_wrapper', 'zstddec_wrapper', 'util', 'utf8', 'q', 'zimDirEntry', 
             }
         }
         if (readRequests.length === 0) {
-            return Q(new Uint8Array(0).buffer);
+            return Promise.resolve(new Uint8Array(0).buffer);
         } else if (readRequests.length === 1) {
             return readRequests[0];
         } else {
             // Wait until all are resolved and concatenate.
-            return Q.all(readRequests).then(function (arrays) {
+            return Promise.all(readRequests).then(function (arrays) {
                 var concatenated = new Uint8Array(end - begin);
                 var offset = 0;
                 arrays.forEach(function (item) {
@@ -227,7 +227,7 @@ define(['xzdec_wrapper', 'zstddec_wrapper', 'util', 'utf8', 'q', 'zimDirEntry', 
                             return that._readSlice(offsetStart, size);
                         }
                     } else {
-                        return Q(new Uint8Array(0).buffer);
+                        return Promise.resolve(new Uint8Array(0).buffer);
                     }
                 };
                 // If only metadata were requested and the cluster is compressed, return null (this is probably a ZIM format error)

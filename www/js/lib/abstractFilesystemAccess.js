@@ -25,7 +25,7 @@
  * along with Kiwix (file LICENSE-GPLv3.txt).  If not, see <http://www.gnu.org/licenses/>
  */
 'use strict';
-define(['q', 'jquery'], function(q, jQuery) {
+define([], function() {
     
     /**
      * Storage implemented by Firefox OS
@@ -50,11 +50,12 @@ define(['q', 'jquery'], function(q, jQuery) {
      *         rejected with an error message.
      */
     StorageFirefoxOS.prototype.get = function(path) {
-        var deferred = q.defer();
-        var request = this._storage.get(path);
-        request.onsuccess = function() { deferred.resolve(this.result); };
-        request.onerror = function() { deferred.reject(this.error.name); };
-        return deferred.promise;
+        var that = this;
+        return new Promise(function (resolve, reject){
+            var request = that._storage.get(path);
+            request.onsuccess = function() { resolve(this.result); };
+            request.onerror = function() { reject(this.error.name); };
+        });
     };
     
     // We try to match both a standalone ZIM file (.zim) or
@@ -67,26 +68,27 @@ define(['q', 'jquery'], function(q, jQuery) {
      *         paths and rejected with an error message.
      */
     StorageFirefoxOS.prototype.scanForArchives = function() {
-        var deferred = jQuery.Deferred();
-        var directories = [];
-        var cursor = this._storage.enumerate();
-        cursor.onerror = function() {
-            deferred.reject(cursor.error);
-        };
-        cursor.onsuccess = function() {
-            if (!cursor.result) {
-                deferred.resolve(directories);
-                return;
-            }
-            var file = cursor.result;
+        var that = this;
+        return new Promise(function (resolve, reject){
+            var directories = [];
+            var cursor = that._storage.enumerate();
+            cursor.onerror = function () {
+                reject(cursor.error);
+            };
+            cursor.onsuccess = function () {
+                if (!cursor.result) {
+                    resolve(directories);
+                    return;
+                }
+                var file = cursor.result;
 
-            if (regexpZIMFileName.test(file.name)) {
-                directories.push(file.name);
-            }
+                if (regexpZIMFileName.test(file.name)) {
+                    directories.push(file.name);
+                }
 
-            cursor.continue();
-        };
-        return deferred.promise();
+                cursor.continue();
+            };
+        });
     };
     
     /**

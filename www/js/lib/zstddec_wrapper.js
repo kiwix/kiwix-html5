@@ -20,7 +20,7 @@
  * along with Kiwix (file LICENSE-GPLv3.txt).  If not, see <http://www.gnu.org/licenses/>
  */
 'use strict';
-define(['q', 'zstddec'], function (Q) {
+define(['zstddec'], function () {
     // DEV: zstddec.js has been compiled with `-s EXPORT_NAME="ZD" -s MODULARIZE=1` to avoid a clash with xzdec which uses "Module" as its exported object
     // Note that we include zstddec above in requireJS definition, but we cannot change the name in the function list
     // There is no longer any need to load it in index.html
@@ -130,7 +130,7 @@ define(['q', 'zstddec'], function (Q) {
         this._outDataBufPos = 0;
         var ret = zd._ZSTD_initDStream(zd._decHandle);
         if (zd._ZSTD_isError(ret)) {
-            return Q.reject('Failed to initialize ZSTD decompression');
+            return Promise.reject('Failed to initialize ZSTD decompression');
         }
 
         return this._readLoop(offset, length).then(function (data) {
@@ -153,14 +153,15 @@ define(['q', 'zstddec'], function (Q) {
      * @returns {Promise} A Promise for the readSlice() function
      */
     Decompressor.prototype.readSliceSingleThread = function (offset, length) {
-        if (!busy) {
+        // Tests whether the decompressor is ready (initiated) and not busy
+        if (zd && !busy) {
             return this.readSlice(offset, length);
         } else {
             // The decompressor is already in progress.
             // To avoid using too much memory, we wait until it has finished
             // before using it for another decompression
             var that = this;
-            return Q.Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 setTimeout(function () {
                     that.readSliceSingleThread(offset, length).then(resolve, reject);
                 }, DELAY_WAITING_IDLE_DECOMPRESSOR);
@@ -181,7 +182,7 @@ define(['q', 'zstddec'], function (Q) {
             var ret = zd._ZSTD_decompressStream(zd._decHandle, zd._outBuffer.ptr, zd._inBuffer.ptr);
             if (zd._ZSTD_isError(ret)) {
                 var errorMessage = "Failed to decompress data stream!\n" + zd.getErrorString(ret);
-                return Q.reject(errorMessage);
+                return Promise.reject(errorMessage);
             }
             // Get updated outbuffer values
             var obxPtr32Bit = zd._outBuffer.ptr >> 2;

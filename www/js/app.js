@@ -26,8 +26,8 @@
 // This uses require.js to structure javascript:
 // http://requirejs.org/docs/api.html#define
 
-define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesystemAccess','q'],
- function($, zimArchiveLoader, uiUtil, settingsStore, abstractFilesystemAccess, Q) {
+define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesystemAccess'],
+ function($, zimArchiveLoader, uiUtil, settingsStore, abstractFilesystemAccess) {
      
     /**
      * The delay (in milliseconds) between two "keepalive" messages sent to the ServiceWorker (so that it is not stopped
@@ -475,7 +475,7 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
      * @returns {Promise<Object>} A Promise for an object with cache attributes 'type', 'description', and 'count'
      */
     function getCacheAttributes() {
-        return Q.Promise(function (resolve, reject) {
+        return new Promise(function (resolve, reject) {
             if (contentInjectionMode === 'serviceworker') {
                 // Create a Message Channel
                 var channel = new MessageChannel();
@@ -963,26 +963,24 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
      * @returns {Promise<Blob>} A promise for the requested file (blob)
      */
     function readRemoteArchive(url) {
-        // DEV: This deferred can't be standardized to a Promise/A+ pattern (using Q) because
-        // IE11 is unable to scope the callbacks inside the Promise correctly. See [kiwix.js #589]
-        var deferred = Q.defer();
-        var request = new XMLHttpRequest();
-        request.open("GET", url);
-        request.responseType = "blob";
-        request.onreadystatechange = function () {
-            if (request.readyState === XMLHttpRequest.DONE) {
-                if (request.status >= 200 && request.status < 300 || request.status === 0) {
-                    // Hack to make this look similar to a file
-                    request.response.name = url;
-                    deferred.resolve(request.response);
-                } else {
-                    deferred.reject("HTTP status " + request.status + " when reading " + url);
+        return new Promise(function (resolve, reject) {
+            var request = new XMLHttpRequest();
+            request.open("GET", url);
+            request.responseType = "blob";
+            request.onreadystatechange = function () {
+                if (request.readyState === XMLHttpRequest.DONE) {
+                    if (request.status >= 200 && request.status < 300 || request.status === 0) {
+                        // Hack to make this look similar to a file
+                        request.response.name = url;
+                        resolve(request.response);
+                    } else {
+                        reject("HTTP status " + request.status + " when reading " + url);
+                    }
                 }
-            }
-        };
-        request.onabort = request.onerror = deferred.reject;
-        request.send();
-        return deferred.promise;
+            };
+            request.onabort = request.onerror = reject;
+            request.send();
+        });
     }
     
     /**
@@ -994,7 +992,7 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
         Array.prototype.slice.call(arguments).forEach(function (arg) {
             readRequests.push(readRemoteArchive(arg));
         });
-        return Q.all(readRequests).then(function (arrayOfArchives) {
+        return Promise.all(readRequests).then(function (arrayOfArchives) {
             setLocalArchiveFromFileList(arrayOfArchives);
         }).catch(function (e) {
             console.error('Unable to load remote archive(s)', e);

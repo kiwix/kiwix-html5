@@ -20,7 +20,7 @@
  * along with Kiwix (file LICENSE-GPLv3.txt).  If not, see <http://www.gnu.org/licenses/>
  */
 'use strict';
-define(['q', 'xzdec'], function(Q) {
+define(['xzdec'], function() {
     // DEV: xzdec.js emits a global Module variable, which cannot be set in requireJS function line above, though it can be loaded in definition
     var xzdec = Module;
     xzdec._init();
@@ -86,14 +86,15 @@ define(['q', 'xzdec'], function(Q) {
      * @returns {Promise} A Promise for the read data
      */
     Decompressor.prototype.readSliceSingleThread = function (offset, length) {
-        if (!busy) {
+        // Tests whether the decompressor is ready (initiated) and not busy
+        if (xzdec && !busy) {
             return this.readSlice(offset, length);
         } else {
             // The decompressor is already in progress.
             // To avoid using too much memory, we wait until it has finished
             // before using it for another decompression
             var that = this;
-            return Q.Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 setTimeout(function () {
                     that.readSliceSingleThread(offset, length).then(resolve, reject);
                 }, DELAY_WAITING_IDLE_DECOMPRESSOR);
@@ -148,8 +149,7 @@ define(['q', 'xzdec'], function(Q) {
      */
     Decompressor.prototype._fillInBufferIfNeeded = function() {
         if (!xzdec._input_empty(this._decHandle)) {
-            // DEV: When converting to Promise/A+, use Promise.resolve(0) here
-            return Q.when(0);
+            return Promise.resolve(0);
         }
         var that = this;
         return this._reader(this._inStreamPos, this._chunkSize).then(function(data) {

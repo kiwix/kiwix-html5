@@ -23,7 +23,7 @@
  */
 'use strict';
 
-define(['q'], function (Q) {
+define([], function () {
     /**
      * Set maximum number of cache blocks of BLOCK_SIZE bytes each
      * Maximum size of cache in bytes = MAX_CACHE_SIZE * BLOCK_SIZE
@@ -166,7 +166,7 @@ define(['q'], function (Q) {
         //     misses = 0;
         // }
         // Wait for all the blocks to be read either from the cache or from the archive
-        return Q.all(readRequests).then(function () {
+        return Promise.all(readRequests).then(function () {
             var result = new Uint8Array(end - begin);
             var pos = 0;
             // Stitch together the data parts in the right order
